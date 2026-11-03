@@ -1,0 +1,101 @@
+---
+# Cartouche Stream: builds the Windows installer on GitHub-hosted runners and publishes it as a
+# release of this fork. Unsigned for now (no SignPath, no private symbols): Windows says
+# "unknown publisher" until Cartouche has its own code-signing certificate.
+# Run it from master with the version to publish; release_notes/<version>.md must exist.
+name: Cartouche Stream release
+permissions: {}
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Version to publish, without a v (2.0.7). Needs release_notes/<version>.md.
+        required: true
+        type: string
+
+concurrency:
+  group: cartouche-release
+  cancel-in-progress: false
+
+jobs:
+  check:
+    name: Check the version
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+      - name: Version, notes and tag
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ inputs.version }}
+        run: |
+          set -euo pipefail
+          if [[ ! "${VERSION}" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "::error::The version is three numbers without a v, like 2.0.7."
+            exit 1
+          fi
+          if [[ ! -f "release_notes/${VERSION}.md" ]]; then
+            echo "::error::release_notes/${VERSION}.md is missing."
+            exit 1
+          fi
+          if gh release view "${VERSION}" --repo "${GITHUB_REPOSITORY}" > /dev/null 2>&1; then
+            echo "::error::${VERSION} is already released."
+            exit 1
+          fi
+
+  windows:
+    name: Windows
+    needs: check
+    permissions:
+      actions: read
+      contents: read
+    uses: ./.github/workflows/ci-windows.yml
+    with:
+      release_commit: ${{ github.sha }}
+      release_version: ${{ inputs.version }}
+      release_tag: ${{ inputs.version }}
+      build_only: false
+      build_tests: false
+      release_artifact_retention_days: 30
+      # The installer still finds itself and its upgrades by the product name Vibeshine.
+      symbol_product_name: Vibeshine
+      symbol_release_prefix: shine
+      publish_symbols: false
+      require_truehdr_runtime: true
+
+  publish:
+    name: Publish the release
+    needs: windows
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+      - name: Download the Windows build
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131  # v7.0.0
+        with:
+          name: build-Windows
+          path: build-Windows
+      - name: Create the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ inputs.version }}
+        run: |
+          set -euo pipefail
+          ls -la build-Windows
+          setup="$(find build-Windows -maxdepth 1 -iname '*Setup*.exe' | head -n 1)"
+          if [[ -z "${setup}" ]]; then
+            echo "::error::The Windows build has no setup .exe."
+            exit 1
+          fi
+          mkdir -p release
+          cp "${setup}" "release/CartoucheStreamSetup-v${VERSION}.exe"
+          gh release create "${VERSION}" "release/CartoucheStreamSetup-v${VERSION}.exe" \
+            --repo "${GITHUB_REPOSITORY}" \
+            --target "${GITHUB_SHA}" \
+            --title "Cartouche Stream ${VERSION}" \
+            --notes-file "release_notes/${VERSION}.md"

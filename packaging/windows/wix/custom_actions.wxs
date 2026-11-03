@@ -53,11 +53,11 @@
   <Fragment>
     <DirectoryRef Id="TARGETDIR">
       <Directory Id="ProgramMenuFolder">
-        <Directory Id="VIBESHINE_PROGRAM_MENU_FOLDER" Name="Vibeshine">
+        <Directory Id="VIBESHINE_PROGRAM_MENU_FOLDER" Name="Cartouche Stream">
           <Component Id="StartMenuShortcut" Guid="{A3B4C5D6-E7F8-4A5B-9C2D-3E4F5A6B7C8D}">
             <Shortcut Id="VibeshineStartMenuShortcut"
-                      Name="Vibeshine"
-                      Description="Open Vibeshine configuration API"
+                      Name="Cartouche Stream"
+                      Description="Open Cartouche Stream settings"
                       Target="[INSTALL_ROOT]sunshine.exe"
                       Icon="ProductIcon.ico"
                       Arguments="--shortcut"
@@ -111,7 +111,7 @@
         <ServiceInstall
             Id="SunshineServiceInstall"
             Name="SunshineService"
-            DisplayName="Vibeshine Service"
+            DisplayName="Cartouche Stream"
             Type="ownProcess"
             Start="auto"
             ErrorControl="normal"
@@ -272,7 +272,7 @@
                bootstrapper's ParseVersion maps this string back into the
                encoded space for comparisons. -->
           <RegistryValue Name="DisplayVersion" Type="string" Value="$(var.VibeshineSemVer)" />
-          <RegistryValue Name="Publisher" Type="string" Value="Nonary" />
+          <RegistryValue Name="Publisher" Type="string" Value="Borderline Games" />
           <RegistryValue Name="InstallLocation" Type="string" Value="[INSTALL_ROOT]" />
           <RegistryValue Name="DisplayIcon" Type="string" Value="[INSTALL_ROOT]sunshine.exe" />
           <RegistryValue Name="UninstallString" Type="string" Value="&quot;[INSTALL_ROOT]uninstall.exe&quot;" />

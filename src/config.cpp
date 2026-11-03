@@ -996,7 +996,7 @@ namespace config {
   };
 
   nvhttp_t nvhttp {
-    "lan",  // origin web manager
+    "pc",  // origin web manager: Cartouche Stream keeps its advanced page to this PC
 
     PRIVATE_KEY_FILE,
     CERTIFICATE_FILE,

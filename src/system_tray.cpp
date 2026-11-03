@@ -116,11 +116,11 @@ namespace system_tray {
   // Tray menu
   static struct tray tray = {
     .icon = TRAY_ICON,
-    .tooltip = PROJECT_NAME,
+    .tooltip = "Cartouche Stream",
     .menu =
       (struct tray_menu[]) {
         // todo - use boost/locale to translate menu strings
-        {.text = "Open Vibeshine", .cb = tray_open_ui_cb},
+        {.text = "Open Cartouche Stream", .cb = tray_open_ui_cb},
         {.text = "-"},
         {.text = "Check for Update", .cb = [](tray_menu *) {
            BOOST_LOG(info) << "Manual update check requested from tray"sv;

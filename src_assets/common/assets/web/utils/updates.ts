@@ -216,7 +216,7 @@ export async function fetchUpdateReleases(
   let complete = false;
   for (let page = 1; page <= 10; page++) {
     const response = await fetch(
-      `https://api.github.com/repos/Nonary/vibeshine/releases?per_page=100&page=${page}`,
+      `https://api.github.com/repos/Ghos1ware/cartouche-stream/releases?per_page=100&page=${page}`,
       { headers: { Accept: 'application/vnd.github+json' }, credentials: 'omit', signal },
     );
     if (!response.ok) throw new Error('releases-unavailable');

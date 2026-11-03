@@ -238,7 +238,7 @@ namespace VibeshineInstaller {
         || _showInstallUsbIpTransportOption;
       var useCompactUpdateLayout = !BuildFlavor.IsUninstallOnly && _installedProduct != null && !showInstallOptions;
       var displayVersion = GetTargetVersionText();
-      Title = (BuildFlavor.IsUninstallOnly ? "Vibeshine Uninstaller v" : "Vibeshine Installer v") + displayVersion;
+      Title = (BuildFlavor.IsUninstallOnly ? "Cartouche Stream Uninstaller v" : "Cartouche Stream Installer v") + displayVersion;
       // WorkArea and WPF window dimensions are both device-independent units.
       // Keep the initial window on screen even with a large display scale.
       var workArea = SystemParameters.WorkArea;
@@ -918,7 +918,7 @@ namespace VibeshineInstaller {
       _continueButton.Content = BuildFlavor.IsUninstallOnly ? "Uninstall Vibeshine" : BuildInstallButtonLabel();
       if (_uninstallUiRequested && _installedProduct == null) {
         SetStatus(
-          "Vibeshine is not installed.",
+          "Cartouche Stream is not installed.",
           BuildFlavor.IsUninstallOnly
             ? "No uninstall action is required."
             : "Uninstall is unavailable. Choose Install Vibeshine to continue.",
@@ -1013,7 +1013,7 @@ namespace VibeshineInstaller {
       // installed app or temporary generic taskbar identities while WPF loads.
       ShellIdentity.TryApplyInstallerWindowIdentity(
         new WindowInteropHelper(this).Handle,
-        BuildFlavor.IsUninstallOnly ? "Vibeshine Uninstaller" : "Vibeshine Installer"
+        BuildFlavor.IsUninstallOnly ? "Cartouche Stream Uninstaller" : "Cartouche Stream Installer"
       );
     }
 
@@ -1141,7 +1141,7 @@ namespace VibeshineInstaller {
     private async void UninstallNowClicked(object sender, RoutedEventArgs e) {
       if (_installedProduct == null) {
         SetStatus("Uninstall not started.", "No Vibeshine installation was found on this PC.", _statusNormalBrush);
-        await ShowOverlayInfoAsync("Nothing to uninstall", "Vibeshine is not currently installed on this PC.");
+        await ShowOverlayInfoAsync("Nothing to uninstall", "Cartouche Stream is not currently installed on this PC.");
         return;
       }
 
@@ -1218,7 +1218,7 @@ namespace VibeshineInstaller {
           installVirtualGamepadDriver,
           installUsbIpTransport,
           false));
-      }, "Install", "Installing or updating Vibeshine...", "Vibeshine installation completed.");
+      }, "Install", "Installing or updating Cartouche Stream...", "Cartouche Stream installation completed.");
     }
 
     private bool ShouldInstallVirtualDisplayDriver() {
@@ -1236,7 +1236,7 @@ namespace VibeshineInstaller {
     private async Task RunUninstallFlow() {
       if (_installedProduct == null) {
         SetStatus("Uninstall not started.", "No Vibeshine installation was found on this PC.", _statusNormalBrush);
-        await ShowOverlayInfoAsync("Nothing to uninstall", "Vibeshine is not currently installed on this PC.");
+        await ShowOverlayInfoAsync("Nothing to uninstall", "Cartouche Stream is not currently installed on this PC.");
         return;
       }
 
@@ -1254,7 +1254,7 @@ namespace VibeshineInstaller {
           removeVirtualGamepadDriver: uninstallOptions.Value.RemoveVirtualGamepadDriver)),
         "Uninstall",
         "Removing Vibeshine...",
-        "Vibeshine uninstall completed.");
+        "Cartouche Stream uninstall completed.");
     }
 
     private async Task RunOperationAsync(Func<Task<InstallerResult>> actionFactory, string actionLabel, string inProgressText, string successText) {
@@ -1270,7 +1270,7 @@ namespace VibeshineInstaller {
             if (!string.IsNullOrWhiteSpace(result.UserDetail)) {
               warningDetail += "\n" + result.UserDetail;
             }
-            SetStatus("Vibeshine installation completed with warnings.", warningDetail, _statusWarningBrush);
+            SetStatus("Cartouche Stream installation completed with warnings.", warningDetail, _statusWarningBrush);
             await ShowInstallPartialSuccessDialogAsync(result);
             Close();
             return;
@@ -1299,10 +1299,10 @@ namespace VibeshineInstaller {
         if (result.Operation == InstallerOperation.Uninstall && result.ExitCode == 1605) {
           ProcessExitCode = 0;
           SetStatus(
-            "Vibeshine is not installed.",
+            "Cartouche Stream is not installed.",
             "Nothing needed to be removed.",
             _statusNormalBrush);
-          await ShowOverlayInfoAsync("Nothing to uninstall", "Vibeshine is not currently installed on this PC.");
+          await ShowOverlayInfoAsync("Nothing to uninstall", "Cartouche Stream is not currently installed on this PC.");
           return;
         }
 
