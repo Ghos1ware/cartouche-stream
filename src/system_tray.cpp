@@ -48,6 +48,9 @@
   #include "logging.h"
   #include "platform/common.h"
   #include "platform/windows/service_constants.h"
+  #ifdef _WIN32
+    #include "platform/windows/misc.h"
+  #endif
   #include "process.h"
   #include "src/entry_handler.h"
   #include "system_tray_lifecycle.h"
@@ -57,6 +60,9 @@ using namespace std::literals;
 
 // system_tray namespace
 namespace system_tray {
+  // The name players see in the tray and in notifications.
+  constexpr auto TRAY_NAME = "Cartouche Stream";
+
   static std::atomic<bool> tray_initialized = false;
 #ifdef _WIN32
   static std::mutex tray_action_mutex;
@@ -116,7 +122,7 @@ namespace system_tray {
   // Tray menu
   static struct tray tray = {
     .icon = TRAY_ICON,
-    .tooltip = "Cartouche Stream",
+    .tooltip = TRAY_NAME,
     .menu =
       (struct tray_menu[]) {
         // todo - use boost/locale to translate menu strings
@@ -423,7 +429,7 @@ namespace system_tray {
   void update_tray_playing(std::string app_name) {
     run_on_tray_thread([app_name = std::move(app_name)]() {
       const auto notification_text = "Streaming started for " + app_name;
-      apply_tray_state(TRAY_ICON_PLAYING, PROJECT_NAME);
+      apply_tray_state(TRAY_ICON_PLAYING, TRAY_NAME);
       apply_tray_state(TRAY_ICON_PLAYING, notification_text, "Stream Started", notification_text, TRAY_ICON_PLAYING);
     });
   }
@@ -431,7 +437,7 @@ namespace system_tray {
   void update_tray_pausing(std::string app_name) {
     run_on_tray_thread([app_name = std::move(app_name)]() {
       const auto notification_text = "Streaming paused for " + app_name;
-      apply_tray_state(TRAY_ICON_PAUSING, PROJECT_NAME);
+      apply_tray_state(TRAY_ICON_PAUSING, TRAY_NAME);
       apply_tray_state(TRAY_ICON_PAUSING, notification_text, "Stream Paused", notification_text, TRAY_ICON_PAUSING);
     });
   }
@@ -439,21 +445,28 @@ namespace system_tray {
   void update_tray_stopped(std::string app_name) {
     run_on_tray_thread([app_name = std::move(app_name)]() {
       auto notification_text = "Application " + app_name + " successfully stopped";
-      apply_tray_state(TRAY_ICON, PROJECT_NAME);
-      apply_tray_state(TRAY_ICON, PROJECT_NAME, "Application Stopped", std::move(notification_text), TRAY_ICON);
+      apply_tray_state(TRAY_ICON, TRAY_NAME);
+      apply_tray_state(TRAY_ICON, TRAY_NAME, "Application Stopped", std::move(notification_text), TRAY_ICON);
     });
   }
 
   void update_tray_require_pin() {
     run_on_tray_thread([]() {
-      apply_tray_state(TRAY_ICON, PROJECT_NAME);
+      apply_tray_state(TRAY_ICON, TRAY_NAME);
       apply_tray_state(
         TRAY_ICON,
-        PROJECT_NAME,
+        TRAY_NAME,
         "Incoming Pairing Request",
         "Click here to complete the pairing process",
         TRAY_ICON_LOCKED,
         []() {
+  #ifdef _WIN32
+          // Cartouche pairs its players' devices in its own screen; without it, the settings page.
+          if (platf::has_url_handler("cartouche")) {
+            platf::open_url("cartouche://stream/pair");
+            return;
+          }
+  #endif
           launch_ui("/clients");
         }
       );
@@ -462,10 +475,10 @@ namespace system_tray {
 
   void update_tray_vigem_missing() {
     run_on_tray_thread([]() {
-      apply_tray_state(TRAY_ICON, PROJECT_NAME);
+      apply_tray_state(TRAY_ICON, TRAY_NAME);
       apply_tray_state(
         TRAY_ICON,
-        PROJECT_NAME,
+        TRAY_NAME,
         "Gamepad Input Unavailable",
         "ViGEm is not installed. Click for setup info",
         TRAY_ICON,
@@ -482,8 +495,8 @@ namespace system_tray {
     const auto notification_text = text ? std::string {text} : std::string {};
 
     run_on_tray_thread([notification_title, notification_text, cb]() {
-      apply_tray_state(TRAY_ICON, PROJECT_NAME);
-      apply_tray_state(TRAY_ICON, PROJECT_NAME, notification_title, notification_text, TRAY_ICON, cb);
+      apply_tray_state(TRAY_ICON, TRAY_NAME);
+      apply_tray_state(TRAY_ICON, TRAY_NAME, notification_title, notification_text, TRAY_ICON, cb);
     });
   }
 

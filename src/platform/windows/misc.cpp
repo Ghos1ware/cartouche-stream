@@ -931,6 +931,9 @@ namespace platf {
     return startup_info;
   }
 
+  // Overriding HKCU and HKCR affects process-wide state: every query through them takes this.
+  static std::mutex per_user_key_mutex;
+
   bool override_per_user_predefined_keys(HANDLE token) {
     HKEY user_classes_root = nullptr;
     if (token) {
@@ -1099,7 +1102,6 @@ namespace platf {
     {
       // Overriding these predefined keys affects process-wide state, so serialize all calls
       // to ensure the handle state is consistent while we perform the command query.
-      static std::mutex per_user_key_mutex;
       auto lg = std::lock_guard(per_user_key_mutex);
 
       // Override HKEY_CLASSES_ROOT and HKEY_CURRENT_USER to ensure we query the correct class info
@@ -1465,6 +1467,36 @@ namespace platf {
       BOOST_LOG(info) << "Opened url ["sv << url << "]"sv;
       child.detach();
     }
+  }
+
+  bool has_url_handler(const std::string &scheme) {
+    // As a service, read the signed-in user's classes, where per-user applications register.
+    HANDLE user_token = nullptr;
+    if (is_running_as_system()) {
+      user_token = retrieve_users_token(false);
+      if (!user_token) {
+        return false;
+      }
+    }
+    const auto scheme_w = utf_utils::from_utf8(scheme);
+    std::array<WCHAR, MAX_PATH> command {};
+    DWORD length = command.size();
+    HRESULT res;
+    {
+      auto lg = std::lock_guard(per_user_key_mutex);
+      if (user_token && !override_per_user_predefined_keys(user_token)) {
+        CloseHandle(user_token);
+        return false;
+      }
+      res = AssocQueryStringW(ASSOCF_NOTRUNCATE, ASSOCSTR_COMMAND, scheme_w.c_str(), L"open", command.data(), &length);
+      if (user_token) {
+        override_per_user_predefined_keys(nullptr);
+      }
+    }
+    if (user_token) {
+      CloseHandle(user_token);
+    }
+    return res == S_OK;
   }
 
   void adjust_thread_priority(thread_priority_e priority) {

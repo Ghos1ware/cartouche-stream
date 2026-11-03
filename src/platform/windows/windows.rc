@@ -20,7 +20,7 @@ BEGIN
         BLOCK "040904E4"
         BEGIN
             VALUE "CompanyName",      TOSTRING(PROJECT_VENDOR)
-            VALUE "FileDescription",  TOSTRING(PROJECT_NAME)
+            VALUE "FileDescription",  "Cartouche Stream"
             VALUE "FileVersion",      TOSTRING(PROJECT_VERSION)
             VALUE "InternalName",     TOSTRING(PROJECT_NAME)
             VALUE "ProductName",      TOSTRING(PROJECT_NAME)

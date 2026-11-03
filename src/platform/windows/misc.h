@@ -153,6 +153,15 @@ namespace platf {
   bool override_per_user_predefined_keys(HANDLE token);
 
   /**
+   * @brief Whether the signed-in user has an application registered for a URL scheme.
+   * @details Cartouche Stream asks before opening a cartouche:// link, so that a PC without
+   *          Cartouche never gets Windows' "look for an app" dialog.
+   * @param scheme The scheme, without "://" (for example "cartouche").
+   * @return true when opening such a link would start an application.
+   */
+  bool has_url_handler(const std::string &scheme);
+
+  /**
    * @brief Check if ViGEm (Virtual Gamepad Emulation Bus) driver is installed.
    * @param version_out Optional pointer to receive a best-effort version string if available.
    * @return true if the ViGEmBus driver file is present, false otherwise.
