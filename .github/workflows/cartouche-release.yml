@@ -65,6 +65,16 @@ jobs:
       symbol_release_prefix: shine
       publish_symbols: false
       require_truehdr_runtime: true
+      # Signed by SignPath Foundation once the SIGNPATH_ORGANIZATION_ID variable and the
+      # SIGNPATH_API_TOKEN secret are set (docs/signpath/CARTOUCHE.md); unsigned until then.
+      # Each request waits for a manual approval in SignPath: approve within the 20 minutes
+      # the signing jobs allow, the MSI first, then the setup.
+      signpath_organization_id: ${{ vars.SIGNPATH_ORGANIZATION_ID }}
+      signpath_project_slug: cartouche-stream
+      signpath_signing_policy_slug: release-signing
+      signpath_wait_for_completion_timeout_in_seconds: 1140
+    secrets:
+      signpath_api_token: ${{ secrets.SIGNPATH_API_TOKEN }}
 
   publish:
     name: Publish the release
